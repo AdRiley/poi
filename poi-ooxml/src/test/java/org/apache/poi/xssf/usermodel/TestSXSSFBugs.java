@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -161,34 +162,44 @@ public final class TestSXSSFBugs extends BaseTestBugzillaIssues {
         sheet.setArrayFormula(col1Value, range);
     }
 
+    /**
+     * Utility method to populate a sheet with test data
+     */
+    private void populateSheetWithTestData(SXSSFSheet sheet, int columnCount, int rowCount) {
+        final int TEN_MINUTES = 1000 * 60 * 10;
+        
+        SXSSFRow row = sheet.createRow(0);
+        SXSSFCell cell;
+
+        // Create header row
+        for (int i = 1; i <= columnCount; i++) {
+            cell = row.createCell(i - 1);
+            cell.setCellValue("Column " + i);
+        }
+
+        // Populate data rows
+        for (int i = 1; i < rowCount; i++) {
+            row = sheet.createRow(i);
+            for (int j = 1; j <= columnCount; j++) {
+                cell = row.createCell(j - 1);
+
+                //make some noise
+                cell.setCellValue(new Date(i * TEN_MINUTES + (j * TEN_MINUTES) / columnCount));
+            }
+            i++;
+        }
+    }
+
     @Disabled("takes too long for the normal test run")
     void test62872() throws Exception {
         final int COLUMN_COUNT = 300;
         final int ROW_COUNT = 600000;
-        final int TEN_MINUTES = 1000 * 60 * 10;
 
         SXSSFWorkbook workbook = new SXSSFWorkbook(100);
         workbook.setCompressTempFiles(true);
         SXSSFSheet sheet = workbook.createSheet("RawData");
 
-        SXSSFRow row = sheet.createRow(0);
-        SXSSFCell cell;
-
-        for (int i = 1; i <= COLUMN_COUNT; i++) {
-            cell = row.createCell(i - 1);
-            cell.setCellValue("Column " + i);
-        }
-
-        for (int i = 1; i < ROW_COUNT; i++) {
-            row = sheet.createRow(i);
-            for (int j = 1; j <= COLUMN_COUNT; j++) {
-                cell = row.createCell(j - 1);
-
-                //make some noise
-                cell.setCellValue(new Date(i * TEN_MINUTES + (j * TEN_MINUTES) / COLUMN_COUNT));
-            }
-            i++;
-        }
+        populateSheetWithTestData(sheet, COLUMN_COUNT, ROW_COUNT);
 
         try (FileOutputStream out = new FileOutputStream(File.createTempFile("test62872", ".xlsx"))) {
             workbook.write(out);
@@ -196,6 +207,33 @@ public final class TestSXSSFBugs extends BaseTestBugzillaIssues {
             workbook.close();
             out.flush();
         }
+    }
+
+    @Test
+    void test69838() throws Exception {
+        final int COLUMN_COUNT = 10;
+        final int ROW_COUNT = 600000;
+
+        File tempfile = File.createTempFile("test69838", ".xlsx");
+
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
+            workbook.setCompressTempFiles(true);
+            SXSSFSheet sheet = workbook.createSheet("RawData");
+            populateSheetWithTestData(sheet, COLUMN_COUNT, ROW_COUNT);       
+            try (FileOutputStream out = new FileOutputStream(tempfile)) {
+                workbook.write(out);
+            }
+        }
+
+        FileInputStream fis = new FileInputStream(tempfile);
+        Workbook wbBack = new XSSFWorkbook(fis);
+        SXSSFWorkbook workbook2 = new SXSSFWorkbook((XSSFWorkbook) wbBack, 100);
+
+        workbook2.setCompressTempFiles(true);
+        SXSSFSheet sheet2 = workbook2.createSheet("RawData2");
+
+        populateSheetWithTestData(sheet2, COLUMN_COUNT, ROW_COUNT);
+
     }
 
     @Test
