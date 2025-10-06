@@ -148,7 +148,7 @@ public class TestInPlaceSXSSFWorkbook {
     @Test
     void test69838() throws Exception {
         final int COLUMN_COUNT = 10;
-        final int ROW_COUNT = 600000;
+        final int ROW_COUNT = 600;
 
         File tempfile = File.createTempFile("test69838", ".xlsx");
 

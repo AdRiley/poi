@@ -126,12 +126,12 @@ public class XSSFWorkbook extends POIXMLDocument implements Workbook, Date1904Su
     /**
      * The underlying XML bean
      */
-    private CTWorkbook workbook;
+    protected CTWorkbook workbook;
 
     /**
      * this holds the XSSFSheet objects attached to this workbook
      */
-    private List<XSSFSheet> sheets;
+    protected List<XSSFSheet> sheets;
 
     /**
      * this holds the XSSFName objects attached to this workbook, keyed by lower-case name
