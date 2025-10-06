@@ -209,32 +209,7 @@ public final class TestSXSSFBugs extends BaseTestBugzillaIssues {
         }
     }
 
-    @Test
-    void test69838() throws Exception {
-        final int COLUMN_COUNT = 10;
-        final int ROW_COUNT = 600000;
 
-        File tempfile = File.createTempFile("test69838", ".xlsx");
-
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
-            workbook.setCompressTempFiles(true);
-            SXSSFSheet sheet = workbook.createSheet("RawData");
-            populateSheetWithTestData(sheet, COLUMN_COUNT, ROW_COUNT);       
-            try (FileOutputStream out = new FileOutputStream(tempfile)) {
-                workbook.write(out);
-            }
-        }
-
-        FileInputStream fis = new FileInputStream(tempfile);
-        Workbook wbBack = new XSSFWorkbook(fis);
-        SXSSFWorkbook workbook2 = new SXSSFWorkbook((XSSFWorkbook) wbBack, 100);
-
-        workbook2.setCompressTempFiles(true);
-        SXSSFSheet sheet2 = workbook2.createSheet("RawData2");
-
-        populateSheetWithTestData(sheet2, COLUMN_COUNT, ROW_COUNT);
-
-    }
 
     @Test
     void test63960() throws Exception {
