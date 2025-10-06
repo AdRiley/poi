@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.LazyXSSFWorkbook;
 
 /**
  * Streaming version of XSSFWorkbook that works with existing files in-place.
@@ -30,8 +30,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
  * Excel file and stream modifications to it, rather than starting with a blank
  * workbook or template.
  * 
- * The class loads an existing XLSX file and creates a streaming workbook from it,
- * allowing for memory-efficient operations on large existing files.
+ * The class uses LazyXSSFWorkbook to load an existing XLSX file with deferred
+ * sheet loading, then creates a streaming workbook from it, allowing for 
+ * memory-efficient operations on large existing files. Only sheet metadata is
+ * loaded initially - actual sheet data is loaded on-demand when accessed.
  */
 public class InPlaceSXSSFWorkbook extends SXSSFWorkbook {
 
@@ -43,7 +45,7 @@ public class InPlaceSXSSFWorkbook extends SXSSFWorkbook {
      * @throws InvalidFormatException if the file format is invalid
      */
     public InPlaceSXSSFWorkbook(File file) throws IOException, InvalidFormatException {
-        super(new XSSFWorkbook(file));
+        super(new LazyXSSFWorkbook(file));
     }
 
     /**
@@ -55,7 +57,7 @@ public class InPlaceSXSSFWorkbook extends SXSSFWorkbook {
      * @throws InvalidFormatException if the file format is invalid
      */
     public InPlaceSXSSFWorkbook(File file, int rowAccessWindowSize) throws IOException, InvalidFormatException {
-        super(new XSSFWorkbook(file), rowAccessWindowSize);
+        super(new LazyXSSFWorkbook(file), rowAccessWindowSize);
     }
 
     /**
@@ -68,7 +70,7 @@ public class InPlaceSXSSFWorkbook extends SXSSFWorkbook {
      * @throws InvalidFormatException if the file format is invalid
      */
     public InPlaceSXSSFWorkbook(File file, int rowAccessWindowSize, boolean compressTmpFiles) throws IOException, InvalidFormatException {
-        super(new XSSFWorkbook(file), rowAccessWindowSize, compressTmpFiles);
+        super(new LazyXSSFWorkbook(file), rowAccessWindowSize, compressTmpFiles);
     }
 
     /**
@@ -82,6 +84,6 @@ public class InPlaceSXSSFWorkbook extends SXSSFWorkbook {
      * @throws InvalidFormatException if the file format is invalid
      */
     public InPlaceSXSSFWorkbook(File file, int rowAccessWindowSize, boolean compressTmpFiles, boolean useSharedStringsTable) throws IOException, InvalidFormatException {
-        super(new XSSFWorkbook(file), rowAccessWindowSize, compressTmpFiles, useSharedStringsTable);
+        super(new LazyXSSFWorkbook(file), rowAccessWindowSize, compressTmpFiles, useSharedStringsTable);
     }
 }

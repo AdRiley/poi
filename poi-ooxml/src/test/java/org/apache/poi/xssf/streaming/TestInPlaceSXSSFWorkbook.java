@@ -27,6 +27,7 @@ import java.util.Date;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.LazyXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -115,7 +116,35 @@ public class TestInPlaceSXSSFWorkbook {
         }
     }
 
-    @Disabled("This test uses large datasets and may cause memory issues - run individually if needed")
+    @Test
+    void testInPlaceSXSSFWorkbookUsesLazyLoading() throws Exception {
+        // Create a workbook with multiple sheets
+        File tempFile = new File(tempDir, "lazy_test.xlsx");
+        
+        try (XSSFWorkbook wb = new XSSFWorkbook()) {
+            wb.createSheet("Sheet1");
+            wb.createSheet("Sheet2");
+            wb.createSheet("Sheet3");
+            
+            try (FileOutputStream out = new FileOutputStream(tempFile)) {
+                wb.write(out);
+            }
+        }
+        
+        // Test that InPlaceSXSSFWorkbook uses LazyXSSFWorkbook
+        try (InPlaceSXSSFWorkbook workbook = new InPlaceSXSSFWorkbook(tempFile)) {
+            assertNotNull(workbook);
+            assertEquals(3, workbook.getNumberOfSheets());
+            
+            // Verify we can access sheets by name and index
+            assertNotNull(workbook.getSheet("Sheet1"));
+            assertNotNull(workbook.getSheetAt(0));
+            assertEquals("Sheet1", workbook.getSheetName(0));
+            assertEquals("Sheet2", workbook.getSheetName(1));
+            assertEquals("Sheet3", workbook.getSheetName(2));
+        }
+    }
+
     @Test
     void test69838() throws Exception {
         final int COLUMN_COUNT = 10;
